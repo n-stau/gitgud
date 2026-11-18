@@ -56,7 +56,30 @@ git diff --cached -U0 | grep -nE '^\+.*(console\.log|debugger;|breakpoint\(\)|pr
 git diff --cached --name-only --diff-filter=AM -z | xargs -0 -r git grep --cached -liIE '(AKIA[0-9A-Z]{16}|BEGIN [A-Z ]*PRIVATE KEY|gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{50,}|sk-[A-Za-z0-9_-]{20,}|xox[abpr]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|(api[_-]?key|secret|passw(or)?d|token)[[:space:]]*[:=][[:space:]]*.{0,2}[A-Za-z0-9/+_-]{16,})' --
 ```
 
-All five print nothing when clean. The secret grep lists file names only; open a hit and judge it without echoing the value. Leftover hits (debug output, TODOs): show them and ask before removing or committing them. Fix for a sensitive file: `git restore --staged -- <file>`, offer to add it to `.gitignore` (ask first; separate `chore:` commit), move the value to an env var with a committed `.env.example`. Large binaries belong in Git LFS or a release asset: ask. A deeper scan (history, personal data, metadata) is the `scrub-private-data` skill, if installed: `python3 ~/.claude/skills/scrub-private-data/scan.py . --no-history`.
+All five print nothing when clean. The secret grep lists file names only; open a hit and judge it without echoing the value. Leftover hits (debug output, TODOs): show them and ask before removing or committing them. Fix for a sensitive file: `git restore --staged -- <file>`, offer to add it to `.gitignore` (ask first; separate `chore:` commit), move the value to an env var with a committed `.env.example`. Large files: see "Size and Git LFS" below. A deeper scan (history, personal data, metadata) is the `scrub-private-data` skill, if installed: `python3 ~/.claude/skills/scrub-private-data/scan.py . --no-history`.
+
+### Size and Git LFS
+
+Decide by size and by how often the file changes, then ask before acting:
+
+| File | Where it goes |
+|---|---|
+| Under 1 MB (icons, screenshots, small images, fixtures) | plain git; LFS adds friction for nothing |
+| 1-10 MB, rarely changes | plain git is fine; mention the size |
+| Binary over ~10 MB, or any binary that changes often (`.psd`, `.blend`, `.fbx`, audio, video, models, datasets) | Git LFS |
+| Over 50 MB | GitHub warns: LFS or a release asset |
+| Over 100 MB | GitHub rejects the push: LFS, a release asset, or out of the repo |
+| Build output, dependency folders, generated archives | not in git at all: `.gitignore`, release asset |
+
+```bash
+git lfs version                                   # missing? suggest `brew install git-lfs` (do not install), then `git lfs install`
+git lfs track "*.psd" "*.blend"                  # writes .gitattributes
+git add .gitattributes && git commit -m "build: track design files with git lfs"
+git add -- art/hero.psd                          # now stored as an LFS pointer
+git lfs ls-files                                 # verify
+```
+
+Track patterns before adding the files; commit `.gitattributes` first. Moving files that are already committed into LFS rewrites history (`git lfs migrate import --include="*.psd" --everything`): that needs a yes and a force push. Keep LFS out of repos people install by cloning or downloading as a zip (skills, templates, dotfiles): zip downloads and many installers fetch only the pointer files, and LFS bandwidth counts against the owner's quota.
 
 ## 4. Write the message
 
