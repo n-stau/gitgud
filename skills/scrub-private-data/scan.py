@@ -36,7 +36,7 @@ RULES = [
     ("jwt", "HIGH", r"\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"),
     ("url-credentials", "HIGH", r"\b[a-z][a-z0-9+.-]*://[^\s/:@\"']+:[^\s/@\"']+@[^\s\"']+"),
     ("secret-assignment", "MEDIUM",
-     r"(?i)\b[\w.-]*(?:password|passwd|pwd|secret|token|api[_-]?key|apikey|client[_-]?secret|access[_-]?key|auth[_-]?key)[\w.-]*[\"']?\s*[:=]\s*[\"']?([^\s\"'`,;)]{6,})"),
+     r"(?i)(?<![\w.-])[\w.-]*(?:password|passwd|pwd|secret|token|api[_-]?key|apikey|client[_-]?secret|access[_-]?key|auth[_-]?key)[\w.-]*[\"']?\s*[:=]\s*[\"']?([^\s\"'`,;)]{6,})"),
     ("email", "MEDIUM", r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
     ("phone", "MEDIUM", r"(?<![\w.])(?:\+\d{2,3}[\s/-]?|\b0)1\d{2,3}[\s/-]?\d{3,4}[\s/-]?\d{3,5}\b|(?<![\w.])\+\d{2,3}[\s/-]?\d{2,5}[\s/-]?\d{3,}[\s/-]?\d{2,}\b"),
     ("iban", "MEDIUM", r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}(?: ?[A-Z0-9]{1,3})?\b"),
@@ -70,6 +70,9 @@ def git(repo, *args, data=None):
 
 SHOW = {"sensitive-file", "exif-gps", "file-metadata", "commit-identity", "remote-with-credentials", "private-term", "email",
         "phone", "home-path", "ip-address", "mac-address", "gps-coordinates", "postcode-city"}
+
+
+CTRL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
 
 
 def redact(rule, s):
@@ -208,7 +211,8 @@ def main():
                 continue
         loc = f"{path}:{ln}" if ln else path
         more = seen.get((path, rule, val), 1) - 1
-        print(f"{sev:6} {rule:22} {loc}  [{where}]  {redact(rule, val)}{f'  (+{more} more in this file)' if more else ''}")
+        line = f"{sev:6} {rule:22} {loc}  [{where}]  {redact(rule, val)}{f'  (+{more} more in this file)' if more else ''}"
+        print(CTRL.sub("?", line))  # repo text may carry terminal escape sequences
     for (path, rule), n in low_seen.items():
         if n > 1:
             print(f"LOW    {rule:22} {path}  … {n - 1} more in this file")

@@ -6,6 +6,9 @@ Not covered: audio/video tags, PSD/RAW, metadata inside compressed PDF object st
 """
 import io, re, struct, zipfile
 
+MAX_XML = 20 * 1024 * 1024  # bytes read per Office XML part
+MAX_OFFICE = 512 * 1024 * 1024  # total unpacked size an Office file may have to be rewritten
+
 EXIF_TAGS = {0x010E: "ImageDescription", 0x010F: "Make", 0x0110: "Model", 0x0131: "Software", 0x0132: "DateTime",
              0x013B: "Artist", 0x8298: "Copyright", 0x9003: "DateTimeOriginal", 0xA430: "CameraOwnerName",
              0xA431: "BodySerialNumber", 0xA435: "LensSerialNumber", 0x9C9D: "XPAuthor", 0x9C9C: "XPComment"}
@@ -81,7 +84,8 @@ def extract(b):
             z = zipfile.ZipFile(io.BytesIO(b))
             for n in z.namelist():
                 if n.endswith(".xml") and (n.startswith(("docProps/", "word/", "xl/", "ppt/")) or n == "meta.xml"):
-                    x = z.read(n)
+                    with z.open(n) as f:
+                        x = f.read(MAX_XML)  # cap: a zip bomb must not exhaust memory
                     out += [(m.group(1).decode(), m.group(2).decode("utf-8", "replace")) for m in OFFICE_FIELDS.finditer(x)]
                     out += [(f"{n}:{m.group(1).decode()}", m.group(2).decode("utf-8", "replace")) for m in OFFICE_AUTHORS.finditer(x)]
         except zipfile.BadZipFile:
@@ -113,6 +117,8 @@ def strip(b):
         return XMP_KEYS.sub(blank, PDF_KEYS.sub(blank, b))
     if k == "office":
         src, dst = zipfile.ZipFile(io.BytesIO(b)), io.BytesIO()
+        if sum(i.file_size for i in src.infolist()) > MAX_OFFICE:
+            return None  # zip bomb or huge file: left untouched, scan.py still reports it
         with zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED) as z:
             for info in src.infolist():
                 x = src.read(info)
