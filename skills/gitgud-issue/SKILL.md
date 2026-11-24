@@ -83,10 +83,10 @@ Group hits that belong together, skip those an open issue already covers (refere
 ## 5. Issue -> branch -> PR
 
 ```bash
-gh issue develop 12 --base main --name fix/12-watchdog-log-noise --checkout   # creates the branch on GitHub, links it to #12
+gh issue develop 12 --base develop --name fix/12-watchdog-log-noise --checkout   # base: develop if the repo has it, else main; links the branch to #12
 ```
 
-Branch name follows `gitgud-branch` (`<type>/<issue>-<short-desc>`). Without `gh issue develop` (older gh, no network): `git switch --no-track -c fix/12-watchdog-log-noise origin/main`. The PR body carries `Closes #12` (`gitgud-pr`); the issue closes when the PR merges into the default branch. `Refs #12` links without closing (partial work).
+Branch name follows `gitgud-branch` (`<type>/<issue>-<short-desc>`). Without `gh issue develop` (older gh, no network): `git switch --no-track -c fix/12-watchdog-log-noise origin/develop` (or `origin/main`). The PR body carries `Closes #12` (`gitgud-pr`); the issue closes when that keyword reaches the default branch, so in the develop model only with the release (`gitgud-branch` section 8). `Refs #12` links without closing (partial work).
 
 ## 6. Issue templates in the repo
 

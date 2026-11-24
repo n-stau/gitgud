@@ -24,7 +24,7 @@ git log --oneline --reverse origin/main..HEAD     # commits that will be in the 
 git rebase origin/main                            # private branch; shared branch: git merge --no-edit origin/main
 ```
 
-Use that base branch wherever this skill says `main`.
+Use that base branch wherever this skill says `main`. Repo with a `develop` branch: feature and fix PRs target `develop` (`gitgud-branch` section 8).
 
 - Fold wip, typo and fixup commits into the commit they belong to before review (ask first; see `gitgud-commit`). Non-interactive: for new fixes `git commit --fixup <sha>`, then `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash origin/main`. Existing `wip`/`fix typo` commits fold into the commit before them with `GIT_SEQUENCE_EDITOR='sed -i.bak -E "s/^pick ([0-9a-f]+ (# )?(wip|WIP|fix typo)([: ]|$))/fixup \1/"' git rebase -i origin/main` (handles both `pick <sha> <subject>` and git >= 2.45 `pick <sha> # <subject>`; check `git log` afterwards). After review started, add new commits instead of rewriting, unless the repo asks for rebased PRs.
 - Run what CI runs: read `.github/workflows/*.yml` (or the repo's CI config) and run the same test, lint, type-check and build commands locally. Report anything you could not run.
@@ -110,7 +110,7 @@ gh repo view --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,vie
 gh pr view --json reviewDecision,mergeStateStatus,statusCheckRollup
 ```
 
-Use the method the repo allows and its history shows. Without a convention: `--squash` for a feature branch with messy commits, `--rebase` for a branch of clean, individually meaningful commits, `--merge` when the branch history itself matters (release branches, long-lived integration). Then:
+Develop model (`gitgud-branch` section 8): feature PRs into `develop` are squash-merged with `--body "Closes #N"`; the release PR `develop` -> `main` only after the user's direct "go", with `--merge` and without `--delete-branch`. Otherwise use the method the repo allows and its history shows. Without a convention: `--squash` for a feature branch with messy commits, `--rebase` for a branch of clean, individually meaningful commits, `--merge` when the branch history itself matters (release branches, long-lived integration). Then:
 
 ```bash
 gh pr merge <N> --squash --delete-branch      # or --rebase / --merge; --auto waits for required checks

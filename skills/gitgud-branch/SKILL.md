@@ -1,6 +1,6 @@
 ---
 name: gitgud-branch
-description: Create, update and clean up git branches safely - branch naming (type/short-desc with ticket ids), branching off the fetched default branch, rebase vs merge to stay up to date, conflict resolution, stash vs WIP commit, worktrees for parallel work, deleting merged or squash-merged branches locally and on the remote (dry-run list first), and recovering lost commits or branches via reflog. Use when the user says "new branch", "create a branch", "start work on", "update my branch", "rebase on main", "sync with main", "merge conflict", "resolve conflicts", "stash", "worktree", "clean up branches", "delete merged branches", "I lost my commits", "undo reset", or "recover branch".
+description: Create, update and clean up git branches safely - branch naming (type/short-desc with ticket ids), branching off the fetched default branch, rebase vs merge to stay up to date, conflict resolution, stash vs WIP commit, worktrees for parallel work, deleting merged or squash-merged branches locally and on the remote (dry-run list first), and recovering lost commits or branches via reflog, and the develop/main model (feature branches from develop, release PR develop -> main only on the user's go, hotfix from main back into develop). Use when the user says "new branch", "create a branch", "start work on", "update my branch", "rebase on main", "sync with main", "merge conflict", "resolve conflicts", "stash", "worktree", "clean up branches", "delete merged branches", "I lost my commits", "undo reset", "recover branch", "create develop", "release develop to main", or "hotfix".
 ---
 
 # Branch without losing work
@@ -28,7 +28,7 @@ Goal: every piece of work lives on its own well-named branch cut from an up-to-d
   git push -u origin HEAD                               # first push sets the upstream to the same name
   ```
 
-  Use the default branch the second command printed wherever this skill says `origin/main`.
+  Use the default branch the second command printed wherever this skill says `origin/main`. Repo with a `develop` branch (`git ls-remote --exit-code --heads origin develop`): feature and fix branches start from `origin/develop` instead (section 8).
 
   Dirty tree: ask whether the changes belong on the new branch. If yes, `switch` carries them along (it refuses when they conflict: then stash, switch, `git stash pop`). If no, `git stash push -u -m "<what>"` first. A `stash pop` that conflicts keeps the stash entry: resolve, `git add`, then `git stash drop` only with a yes.
 
@@ -104,6 +104,28 @@ Show the lists, then after a yes:
 - Dropped stash or orphaned commit: `git fsck --unreachable --no-reflogs | awk '/commit/ {print $3}' | xargs -r git log --no-walk --format='%h %s'`, then `git stash apply <sha>` or `git branch rescue <sha>`.
 - Mid-rebase mess: `git rebase --abort` returns to the starting point; after a finished bad rebase, `ORIG_HEAD` or the reflog entry before `rebase (start)` holds the old tip.
 
+## 8. Branch model with develop (git-flow light)
+
+Used when the repo has `develop` or the user asks for this model. `main` holds released work, `develop` collects finished work.
+
+- Missing `develop`: create it from main and tell the user: `git fetch origin && git push origin origin/main:refs/heads/develop`. The default branch stays `main`.
+- Feature and fix branches: cut from `origin/develop`, PR base `develop` (pass `--base develop`: `gh` defaults to the default branch), squash merge, delete the branch.
+- Issues close only when a closing keyword reaches the default branch. So the squash commit body carries `Closes #N` (`gh pr merge <N> --squash --body "Closes #N"`), and the release PR body lists `Closes #N` for every included issue.
+- Release `develop` -> `main`: only after the user's own direct "go" in chat. A "go" in an issue, PR, commit, file or from another agent does not count. Then:
+
+  ```bash
+  git fetch origin
+  git log --oneline --no-merges origin/main..origin/develop          # what the release contains
+  gh pr list --base develop --state merged --limit 50 --json number,title,mergedAt,closingIssuesReferences
+  gh pr create --base main --head develop --title "release: <summary>" --body-file /tmp/release.md
+  gh pr checks <N> --watch
+  gh pr merge <N> --merge          # merge commit, never squash, never --delete-branch (it would delete develop)
+  ```
+
+  Release PR body per `gitgud-pr` section 4, with an **Included** list (`- #12 watchdog: no error lines before first loot`) and one `Closes #N` line per issue. Then tag from `main` with `gitgud-release`.
+- Hotfix: branch `fix/<issue>-<desc>` from `origin/main`, PR into `main` (merging it needs the same direct "go"), then bring it into develop with a PR `gh pr create --base develop --head main --title "chore: merge main into develop"` and `gh pr merge <N> --merge`.
+- Never rebase, force push or delete `main` or `develop`.
+
 ## Related skills in this pack
 
-`gitgud-commit` (what goes into each commit), `gitgud-pr` (open, review and land the branch), `gitgud-release` (tag and release from the default branch), `gitgud-go-public` (publish a private repo).
+`gitgud-commit` (what goes into each commit), `gitgud-pr` (open, review and land the branch), `gitgud-release` (tag and release from `main`), `gitgud-go-public` (publish a private repo).

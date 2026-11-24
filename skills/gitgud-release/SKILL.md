@@ -16,7 +16,7 @@ Tools next to this file (Python stdlib + git, nothing to install):
 
 - Steps 1-3 are a dry run: working-tree edits only (undo with `git restore`, delete files you created), no commit, tag or push. Show the version, the changelog section and the list of files to bump, then wait for a yes before committing and tagging.
 - Pushing the tag and creating the GitHub release need a second explicit yes. Tags are public and hard to take back once pulled by others or picked up by package registries.
-- Release from the default branch (or the repo's release branch), clean tree, up to date with the remote. Never move or reuse an existing tag; a bad release gets a new patch version.
+- Release from the default branch (or the repo's release branch), clean tree, up to date with the remote. Develop model: tag `main` after the release PR `develop` -> `main` merged (`gitgud-branch` section 8), never `develop`. Never move or reuse an existing tag; a bad release gets a new patch version.
 - The user decides the version. The script only suggests one. Pre-1.0 (`0.x`) breaking changes bump the minor version: tell the user and ask whether it should be `1.0.0` instead.
 - If the repo already has release tooling (release-please, semantic-release, changesets, `cargo release`, `npm version` scripts, a `release.yml` workflow), use that instead of this flow and only explain what it will do.
 
