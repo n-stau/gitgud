@@ -75,17 +75,18 @@ Stop when a round has no blocking findings or after round 5. Round 5 with findin
 
 Merge only when all of these hold; otherwise do not merge and report:
 - the last round had no blocking findings;
-- `gh pr view <N> --json mergeStateStatus,statusCheckRollup` shows `CLEAN` and at least one check, all passed (no checks at all: ask the user and offer `gitgud-ci`);
-- the PR does not change `.github/` (workflows, rulesets, templates), install, build or release scripts, dependency manifests or lockfiles, test configuration, or delete tests (`gh pr diff <N> --name-only`, `git diff --diff-filter=D --name-only origin/develop...HEAD`): such a PR can turn its own checks green, so it needs the user's review.
+- `gh pr view <N> --json mergeStateStatus,statusCheckRollup` shows `CLEAN` and at least one check, all passed (no checks at all: no merge; report it and offer `gitgud-ci`);
+- the PR does not change `.github/` (workflows, rulesets, templates), install, build or release scripts, dependency manifests or lockfiles, test configuration, or delete tests (`gh api repos/{owner}/{repo}/pulls/<N>/files --paginate --jq '.[] | "\(.status) \(.filename)"'` lists every file with `added`, `modified` or `removed`): such a PR can turn its own checks green, so it needs the user's review.
 
 ```bash
-gh pr merge <N> --squash --delete-branch --body "Closes #12" --match-head-commit <reviewed-sha>   # fails if anything was pushed after the last review
+sha=$(gh pr view <N> --json headRefOid -q .headRefOid)   # record right after the clean round and the check verification
+git worktree remove ../<repo>-<N>                          # first, if a worktree was used: the branch is on GitHub
+gh pr merge <N> --squash --delete-branch --body "Closes #12" --match-head-commit "$sha"   # fails if anything was pushed since
 git switch develop && git pull --ff-only
-git worktree remove ../<repo>-<N>      # if a worktree was used
 ```
 
 ## 6. Report, and release on go
 
-Tell the user: PR URL, merged or not, rounds run, findings fixed (with SHAs), findings declined (with reason), findings still open, check status, anything not tested, any stash left from step 2.
+Tell the user: PR URL, merged or not, rounds run, findings fixed (with SHAs), findings declined (with reason), findings still open, check status, anything not tested, any stash you created.
 
 `main` changes only through the release PR `develop` -> `main`, opened and merged per `gitgud-branch` section 8 after the user's own direct "go" in this chat; then offer `gitgud-release` for the tag.
