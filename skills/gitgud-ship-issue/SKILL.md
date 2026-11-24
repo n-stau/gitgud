@@ -79,9 +79,11 @@ Merge only when all of these hold; otherwise do not merge and report:
 - the PR does not change `.github/` (workflows, rulesets, templates), install, build or release scripts, dependency manifests or lockfiles, test configuration, agent instruction files (`AGENTS.md`, `CLAUDE.md`, `.claude/`, skill files), or delete tests (`gh api repos/{owner}/{repo}/pulls/<N>/files --paginate --jq '.[] | "\(.status) \(.filename) \(.previous_filename // "")"'` lists every file; for `renamed`, check the old path too): such a PR can turn its own checks green, so it needs the user's review.
 
 ```bash
-[ "$(gh pr view <N> --json headRefOid -q .headRefOid)" = "$sha" ] || exit 1   # sha from 4a of the clean round; moved head: stop and report
-git worktree remove "../<repo>-<N>"                        # first, if a worktree was used: the branch is on GitHub
-gh pr merge <N> --squash --delete-branch --body "Closes #12" --match-head-commit "$sha"   # fails if anything was pushed since
+sha=<sha from 4a of the clean round>   # paste it literally: shell variables do not survive between calls
+[ -n "$sha" ] && [ "$(gh pr view <N> --json headRefOid -q .headRefOid)" = "$sha" ] || exit 1   # moved head: stop and report
+cd "<main checkout>"                  # leave the issue worktree before removing it
+git worktree remove "../<repo>-<N>"   # if a worktree was used: the branch is on GitHub
+gh pr merge <N> --squash --delete-branch --body "Closes #<issue>" --match-head-commit "$sha"
 git switch develop && git pull --ff-only
 ```
 

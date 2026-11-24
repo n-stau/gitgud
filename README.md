@@ -18,7 +18,7 @@ gitgud is a pack of git skills for coding agents that commits, branches, reviews
 - **Nothing private slips in**: every commit checks for `.env` files, keys, large binaries and debug leftovers; `scrub-private-data` scans the full history, commit metadata and photo EXIF/GPS.
 - **Branches without drama**: rebase or merge chosen by whether the branch is shared, conflict workflow, squash-merge-aware cleanup, reflog recovery.
 - **Issues and PRs anyone can read**: plain-language summary first, jargon and run IDs collapsed, issue -> branch -> PR with `Closes #N`.
-- **Issue to reviewed PR**: one request ships an issue on its own branch, then fresh reviewer agents and a fixer loop on the PR until it is clean; you merge.
+- **Issue to reviewed PR**: one request ships an issue on its own branch, then fresh reviewer agents and a fixer loop on the PR until it is clean, then a merge into `develop`; `main` changes only when you say go.
 - **CI that guards main**: stack-detected workflow with SHA-pinned actions and an optional ruleset requiring green checks.
 - **Releases from history**: next semver version and a Keep a Changelog section generated from commits by a stdlib-only script.
 - **Ready to open source**: a guided checklist from secret scan to license, README and replacing the old history on GitHub.
@@ -58,7 +58,7 @@ make this repo ready to go public
 | `gitgud-issue` | Plain-language bug and task issues, issue templates, issue -> branch -> PR |
 | `gitgud-pr` | Self-review, plain-language PR body, splitting, review replies, merge and cleanup |
 | `gitgud-ci` | Actions checks pinned by SHA, PR template, optional rules for main |
-| `gitgud-ship-issue` | Local loop: issue -> branch -> PR, then up to 5 rounds of fresh-agent review and fixes |
+| `gitgud-ship-issue` | Local loop: issue -> branch -> PR -> up to 5 rounds of fresh-agent review and fixes -> merge into develop |
 | `gitgud-release` | Semver bump, changelog, manifest versions, annotated tag and GitHub release |
 | `gitgud-go-public` | Release-readiness checklist for publishing a private repo |
 | `scrub-private-data` | Find and remove secrets, personal data and metadata in files and full history |
