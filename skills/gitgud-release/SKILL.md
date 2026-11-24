@@ -62,6 +62,8 @@ Show the full planned diff (`git diff`) together with the section from step 2. S
 
 ## 4. Commit and tag (after the yes)
 
+Develop model (`gitgud-branch` section 8), instead of steps 4-5 as written: commit `chore(release): v1.3.0` on a branch off `origin/develop` and merge it into `develop` by PR; run the release PR after the user's go; then tag the merged `main` and push only the tag (`git fetch origin && git tag -a v1.3.0 -m "v1.3.0" origin/main && git push origin v1.3.0`, second yes); then merge `main` back into `develop` by PR as after a hotfix, so the next changelog finds the tag.
+
 ```bash
 git add -- CHANGELOG.md package.json package-lock.json pyproject.toml     # only the files you changed
 git commit -m "chore(release): v1.3.0"
@@ -81,7 +83,7 @@ gh release create v1.3.0 --verify-tag --title "v1.3.0" --notes-file /tmp/release
 gh release view v1.3.0 --json url,isDraft,isPrerelease
 ```
 
-Prereleases: add `--prerelease`. If the default branch is protected, push the release commit through a PR (`gitgud-pr`) and tag the merge commit afterwards. Develop model: then merge `main` back into `develop` as after a hotfix (`gitgud-branch` section 8), or `develop` keeps the old version and changelog. Package publishing (`npm publish`, `twine upload`, `cargo publish`) is a separate step with its own yes, usually done by CI on the tag.
+Prereleases: add `--prerelease`. If the default branch is protected, push the release commit through a PR (`gitgud-pr`) and tag the merge commit afterwards. Package publishing (`npm publish`, `twine upload`, `cargo publish`) is a separate step with its own yes, usually done by CI on the tag.
 
 ## 6. Report
 
