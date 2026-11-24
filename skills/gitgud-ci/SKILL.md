@@ -143,7 +143,7 @@ gh api -X POST repos/{owner}/{repo}/rulesets --input /tmp/ruleset.json
 
 - Effect on `main`: no force push, no deletion, every change through a PR, merge only with green `test`. `integration_id` 15368 is GitHub Actions: only an Actions run can satisfy the check, not a status anyone with write access can set. List every required job name in `required_status_checks`, and only names that already ran once.
 - Required review is opt-in, default off: a solo developer cannot approve their own PR, so `required_approving_review_count: 1` would block every merge. Turn it on only when a second person reviews.
-- Repo with `develop` (`gitgud-branch` section 8): a second ruleset in its own file `/tmp/ruleset-develop.json`, posted the same way. No `pull_request` rule, so squash merges keep working; required checks block direct pushes of unchecked commits:
+- Repo with `develop` (`gitgud-branch` section 8): a second ruleset in its own file `/tmp/ruleset-develop.json`, posted the same way after `develop` exists (with the ruleset in place, creating the branch is rejected). No `pull_request` rule, so squash merges keep working; required checks block direct pushes of unchecked commits:
 
   ```json
   {"name": "develop", "target": "branch", "enforcement": "active",
