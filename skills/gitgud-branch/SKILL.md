@@ -122,6 +122,6 @@ Used when the repo has `develop` or the user asks for this model. `main` holds r
   gh pr checks <N> --watch --fail-fast && gh pr merge <N> --merge --match-head-commit "$sha"   # merge commit; never squash, never --delete-branch (it would delete develop)
   ```
 
-  Then tag from `main` with `gitgud-release`.
+  Then tag from `main` and merge `main` back into `develop` with `gitgud-release`. No checks on the release PR: ask the user before merging.
 - Hotfix: branch `fix/<issue>-<desc>` from `origin/main`, PR into `main` with `Closes #N` (merging it, `--merge`, needs the same direct "go"; tag per `gitgud-release`), then bring it into develop with a PR `gh pr create --base develop --head main --title "chore: merge main into develop"` and `gh pr merge <N> --merge`.
 - Never rebase, force push or delete `main` or `develop`.

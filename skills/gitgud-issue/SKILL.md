@@ -134,4 +134,4 @@ body:
 
 Use labels that exist in the repo. Commit both files with `gitgud-commit` (`chore: add issue templates`). The PR template lives in `gitgud-ci`.
 
-Next: branch linked to the issue (`gitgud-branch` section 1), `Closes #12` in the PR body (`gitgud-pr` section 4), or the whole flow with a review loop (`gitgud-ship-issue`).
+Next: branch linked to the issue (`gitgud-branch` section 1), `Closes #12` in the PR body (`gitgud-pr` section 4), or the whole flow with a review loop (`gitgud-ship-issue`). Repo with `develop`: the keyword only closes the issue once it reaches `main` (`gitgud-branch` section 8).

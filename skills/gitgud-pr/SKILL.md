@@ -80,7 +80,7 @@ Closes #123
 
 ```bash
 git push -u origin HEAD
-gh pr create --base main --title "$(cat /tmp/pr-title.txt)" --body-file /tmp/pr-body.md   # title in a file: no shell expansion of backticks or $(...)
+gh pr create --base <base> --title "$(cat /tmp/pr-title.txt)" --body-file /tmp/pr-body.md   # title in a file: no shell expansion of backticks or $(...)
 gh pr view --json url,isDraft,mergeStateStatus
 ```
 
@@ -106,7 +106,7 @@ gh api graphql -F o=<owner> -F r=<repo> -F n=<N> -f query='query($o:String!,$r:S
 ```bash
 gh repo view --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,viewerDefaultMergeMethod,deleteBranchOnMerge
 gh pr view --json reviewDecision,mergeStateStatus,statusCheckRollup
-gh pr merge <N> --squash --delete-branch      # feature branches; or --rebase / --merge; --auto waits for required checks
+gh pr merge <N> --squash --delete-branch --body "Closes #N"   # feature branches; or --rebase / --merge; --auto waits for required checks
                                               # head develop or main (release, back-merge): --merge, never --delete-branch
 ```
 
