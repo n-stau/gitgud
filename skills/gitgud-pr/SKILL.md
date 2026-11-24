@@ -10,7 +10,7 @@ Goal: a reviewer understands the PR from its title and first paragraph, can revi
 ## Rules
 
 - Check for an existing PR for the branch before creating one: `gh pr view --json number,url,state` (fails when there is none).
-- Opening a PR the user asked for is fine. These need an explicit yes: merging, closing, `--admin` merges, force pushes, posting comments or review replies the user did not ask you to write, requesting reviewers, deleting branches.
+- Opening a PR the user asked for is fine. These need an explicit yes: merging (except the merge into `develop` that `gitgud-ship-issue` does under its gate), closing, `--admin` merges, force pushes, posting comments or review replies the user did not ask you to write, requesting reviewers, deleting branches.
 - Never merge with failing required checks or unresolved requested changes.
 - Title, body and comments are public to everyone with repo access: no secrets, private paths, internal hostnames or personal data.
 - Add an attribution line only if the user or environment requires one; then put it at the end of the body.
@@ -106,7 +106,7 @@ gh api graphql -F o=<owner> -F r=<repo> -F n=<N> -f query='query($o:String!,$r:S
 ```bash
 gh repo view --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,viewerDefaultMergeMethod,deleteBranchOnMerge
 gh pr view --json reviewDecision,mergeStateStatus,statusCheckRollup
-gh pr merge <N> --squash --delete-branch --body "Closes #N"   # feature branches; or --rebase / --merge; --auto waits for required checks
+gh pr merge <N> --squash --delete-branch --body "Closes #N"   # feature branches, --body only with an issue; or --rebase / --merge; --auto waits for required checks
                                               # head develop or main (release, back-merge): --merge, never --delete-branch
 ```
 

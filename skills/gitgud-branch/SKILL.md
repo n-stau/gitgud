@@ -119,6 +119,7 @@ Used when the repo has `develop` or the user asks for this model. `main` holds r
   # write /tmp/release.md: body per gitgud-pr section 4, an Included list (- #12 watchdog: no error lines before first loot), one Closes #N line per issue
   gh pr create --base main --head develop --title "release: <summary>" --body-file /tmp/release.md
   sha=$(gh pr view <N> --json headRefOid -q .headRefOid)    # show it with the body: the go covers exactly this commit
+  gh repo view --json deleteBranchOnMerge -q .deleteBranchOnMerge   # true would delete develop on merge: stop and ask
   gh pr checks <N> --watch --fail-fast && gh pr merge <N> --merge --match-head-commit "$sha"   # merge commit; never squash, never --delete-branch (it would delete develop)
   ```
 

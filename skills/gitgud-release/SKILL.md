@@ -62,7 +62,7 @@ Show the full planned diff (`git diff`) together with the section from step 2. S
 
 ## 4. Commit and tag (after the yes)
 
-Develop model (`gitgud-branch` section 8), instead of steps 4-5 as written: commit `chore(release): v1.3.0` on a branch off `origin/develop` and merge it into `develop` by PR; run the release PR after the user's go; then tag the merged `main` and push only the tag (`git fetch origin && git tag -a v1.3.0 -m "v1.3.0" origin/main && git push origin v1.3.0`, second yes); then merge `main` back into `develop` by PR as after a hotfix, so the next changelog finds the tag.
+Develop model (`gitgud-branch` section 8), instead of the commit, tag and push lines of steps 4-5 (keep the notes extraction and `gh release create` of step 5): commit `chore(release): v1.3.0` on a branch off `origin/develop` and merge it into `develop` by PR; run the release PR after the user's go; then tag the merged `main` and push only the tag (`git fetch origin && git tag -a v1.3.0 -m "v1.3.0" origin/main && git push origin v1.3.0`, second yes); then merge `main` back into `develop` by PR as after a hotfix, so the next changelog finds the tag.
 
 ```bash
 git add -- CHANGELOG.md package.json package-lock.json pyproject.toml     # only the files you changed
