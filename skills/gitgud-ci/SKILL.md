@@ -1,6 +1,6 @@
 ---
 name: gitgud-ci
-description: One-time GitHub setup so every PR is checked before it reaches main - a GitHub Actions workflow for test, lint and build matching the detected stack (actions pinned by commit SHA, read-only token), a PR template in the plain-language gitgud-pr style, and optional protection for main via a ruleset (no force push, no deletion, required green checks, review approval opt-in). Every GitHub settings change needs an explicit yes. Use when the user says "set up CI", "add GitHub Actions", "add a workflow", "run tests on PRs", "protect main", "branch protection", "ruleset", "require checks", or "PR template".
+description: One-time GitHub setup so every PR is checked before it reaches main - a GitHub Actions workflow for test, lint and build matching the detected stack (actions pinned by commit SHA, read-only token), a PR template in the plain-language gitgud-pr style, and rulesets for main (changes only via PR, required green checks, no force push or deletion, review approval opt-in) and optionally develop (required checks). Every GitHub settings change needs an explicit yes. Use when the user says "set up CI", "add GitHub Actions", "add a workflow", "run tests on PRs", "protect main", "branch protection", "ruleset", "require checks", or "PR template".
 ---
 
 # CI and branch rules for a repo
@@ -53,7 +53,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, develop]
 permissions:
   contents: read
 concurrency:
@@ -149,8 +149,9 @@ Ruleset for the default branch (`/tmp/ruleset.json`):
 gh api -X POST repos/{owner}/{repo}/rulesets --input /tmp/ruleset.json
 ```
 
-- Effect: no force push, no deleting `main`, every change through a PR, merge only with green `test`. List every required job name in `required_status_checks`, and only names that already ran once.
+- Effect on `main`: no force push, no deletion, every change through a PR, merge only with green `test`. List every required job name in `required_status_checks`, and only names that already ran once.
 - Required review is opt-in, default off: a solo developer cannot approve their own PR, so `required_approving_review_count: 1` would block every merge. Turn it on only when a second person reviews.
+- Repo with `develop` (`gitgud-branch` section 8): add a second ruleset that keeps `develop` safe without blocking squash merges. Same file with `"name": "develop"`, `"include": ["refs/heads/develop"]` and the rules `deletion`, `non_fast_forward` and `required_status_checks` (no `pull_request` rule needed; required checks already block direct pushes of unchecked commits).
 - Change later: `gh api -X PUT repos/{owner}/{repo}/rulesets/<id> --input /tmp/ruleset.json`. Remove: `gh api -X DELETE repos/{owner}/{repo}/rulesets/<id>` (yes needed).
 - Classic branch protection only if the repo already uses it; do not set both.
 
