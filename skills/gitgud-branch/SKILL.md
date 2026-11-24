@@ -88,12 +88,12 @@ git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads | awk 
 git branch -r --merged origin/main --format='%(refname:lstrip=3)' | grep -vxE 'HEAD|main|master|develop|trunk'
 ```
 
-Show the lists, then after a yes:
+Show the lists, then after a yes. Never paste names from a listing into a command (a ref name may contain shell characters): write the chosen names to a file, one per line, and loop: `while IFS= read -r b; do git branch -d -- "$b"; done < /tmp/branches.txt` (`-D`, or `git push origin --delete -- "$b"` for the cases below).
 
-- Merged: `git branch -d -- <names>`. Only delete what the first list showed: `-d` also accepts a branch merged into its own upstream but not into main.
-- Squash-merged (second list): `-d` refuses them; `git branch -D <branch>` with a yes. Do not use `git cherry` for this: a multi-commit squash shows `+` lines although it is merged.
-- Gone (third list) but in neither of the first two: probably abandoned or unfinished. Check `gh pr list --head <branch> --state all` and show `git log --oneline origin/main..<branch>` before asking.
-- Remote: with a yes per branch list, write the names to a file, one per line, then `while IFS= read -r b; do git push origin --delete -- "$b"; done < /tmp/branches.txt` (try `--dry-run` first). Never paste names from a listing into a command: a ref name may contain shell characters.
+- Merged: `-d`. Only delete what the first list showed: `-d` also accepts a branch merged into its own upstream but not into main.
+- Squash-merged (second list): `-d` refuses them; `-D` with a yes. Do not use `git cherry` for this: a multi-commit squash shows `+` lines although it is merged.
+- Gone (third list) but in neither of the first two: probably abandoned or unfinished. Check `gh pr list --head "$b" --state all` and show `git log --oneline "origin/main..$b"` before asking.
+- Remote: `git push origin --delete -- "$b"` in the same loop, with a yes per branch list (try `--dry-run` first).
 
 ## 7. Recover lost work
 
@@ -122,5 +122,5 @@ Used when the repo has `develop` or the user asks for this model. `main` holds r
   ```
 
   Then tag from `main` with `gitgud-release`.
-- Hotfix: branch `fix/<issue>-<desc>` from `origin/main`, PR into `main` (merging it needs the same direct "go"), then bring it into develop with a PR `gh pr create --base develop --head main --title "chore: merge main into develop"` and `gh pr merge <N> --merge`.
+- Hotfix: branch `fix/<issue>-<desc>` from `origin/main`, PR into `main` with `Closes #N` (merging it, `--merge`, needs the same direct "go"; tag per `gitgud-release`), then bring it into develop with a PR `gh pr create --base develop --head main --title "chore: merge main into develop"` and `gh pr merge <N> --merge`.
 - Never rebase, force push or delete `main` or `develop`.

@@ -106,7 +106,8 @@ gh api graphql -F o=<owner> -F r=<repo> -F n=<N> -f query='query($o:String!,$r:S
 ```bash
 gh repo view --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,viewerDefaultMergeMethod,deleteBranchOnMerge
 gh pr view --json reviewDecision,mergeStateStatus,statusCheckRollup
-gh pr merge <N> --squash --delete-branch      # or --rebase / --merge; --auto waits for required checks
+gh pr merge <N> --squash --delete-branch      # feature branches; or --rebase / --merge; --auto waits for required checks
+                                              # head develop or main (release, back-merge): --merge, never --delete-branch
 ```
 
 Develop model: method, `Closes #N` in the squash commit and the release PR per `gitgud-branch` section 8. Otherwise use the method the repo allows and its history shows. Without a convention: `--squash` for a feature branch with messy commits, `--rebase` for a branch of clean, individually meaningful commits, `--merge` when the branch history itself matters (release branches, long-lived integration).
@@ -114,7 +115,7 @@ Develop model: method, `Closes #N` in the squash commit and the release PR per `
 ## 8. After merge
 
 ```bash
-git switch main && git pull --ff-only
+git switch <base> && git pull --ff-only     # the PR's base: develop in the develop model
 ```
 
 Delete the local branch per `gitgud-branch` section 6. Report the PR URL, merge method, and anything left open (follow-up issues, unresolved comments).
