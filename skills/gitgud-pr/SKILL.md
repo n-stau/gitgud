@@ -1,6 +1,6 @@
 ---
 name: gitgud-pr
-description: Take a branch from finished work to merged PR with the gh CLI - clean up history, self-review the full diff against the base, run tests and lint, write the title and body (what, why, how tested, risks, linked issues), keep PRs small or split them, choose draft vs ready, watch checks, answer review comments, merge with the strategy the repo allows, and clean up afterwards. Use when the user says "open a PR", "create a pull request", "make a PR", "is this ready for review", "address review comments", "reply to the review", "check CI on my PR", "merge the PR", "squash and merge", or "clean up after merge".
+description: Take a branch from finished work to merged PR with the gh CLI - clean up history, self-review the full diff against the base, run tests and lint, write the title and a plain-language body (what and why, changes, tested, risks, Closes #N, details collapsed), keep PRs small or split them, choose draft vs ready, watch checks, answer review comments, merge with the strategy the repo allows, and clean up afterwards. Use when the user says "open a PR", "create a pull request", "make a PR", "is this ready for review", "address review comments", "reply to the review", "check CI on my PR", "merge the PR", "squash and merge", or "clean up after merge".
 ---
 
 # Pull requests from ready to merged
@@ -51,22 +51,32 @@ Then: remove debug output (ask if unsure whether it is intended logging), turn T
 
 Title: what changes for the user, in the repo's style. If PRs are squash-merged, the title becomes the commit subject, so use the commit convention (`feat(auth): add OAuth login`). Look at `gh pr list --state merged --limit 10`.
 
-Body: use the repo's template if one exists (`git ls-files | grep -i pull_request_template`) and add How tested / Risks if it lacks them. Otherwise:
+Body: use the repo's template if one exists (`git ls-files | grep -i pull_request_template`) and fill it in this style. Otherwise:
 
 ```markdown
-<What problem this solves, in one or two sentences. Lead with the why.>
+**What and why** <2-3 sentences an outsider understands: the problem and what this PR does about it.>
 
-## Changes
-- <the few changes a reviewer must know about, not a file list>
+**Changes**
+- <at most 5 bullets, one line each, what a reviewer must know; not a file list>
 
-## How tested
-- <commands run, manual steps, results>
+**Tested**
+- [x] <command run or manual step, with result>
+- [ ] <check that could not run, and why>
 
-## Risks
-- <migrations, config changes, behavior changes, rollback plan; "None known" is fine>
+**Risks** <only real ones: migrations, config or behavior changes, rollback. Leave the section out if none.>
 
 Closes #123
+
+<details><summary>Details</summary>
+
+<run IDs, logs, env vars, paths, design notes, follow-ups>
+</details>
 ```
+
+- Spell out every abbreviation on first use. Run IDs, env vars and paths go only into `<details>`, never into "What and why".
+- No wall of insider jargon: if a sentence needs the codebase to make sense, rewrite it or move it into `<details>`.
+- No issue: leave out `Closes`. Partial work: `Refs #N`.
+- More than ~400 changed lines: split first (section 3) instead of writing a longer body.
 
 Add screenshots or a short recording for UI changes (drag into the PR on GitHub; gh cannot upload images). `Closes #N` / `Fixes #N` closes the issue on merge; `Refs #N` only links.
 
@@ -118,4 +128,4 @@ Report the PR URL, merge method, and anything left open (follow-up issues, unres
 
 ## Related skills in this pack
 
-`gitgud-commit` (clean commits before review), `gitgud-branch` (rebase, conflicts, branch cleanup), `gitgud-release` (ship what was merged), `gitgud-go-public` (publish a private repo).
+`gitgud-commit` (clean commits before review), `gitgud-issue` (issues in the same style, issue -> branch), `gitgud-ci` (checks and rules for main), `gitgud-ship-issue` (issue -> PR -> review loop), `gitgud-branch` (rebase, conflicts, branch cleanup), `gitgud-release` (ship what was merged), `gitgud-go-public` (publish a private repo).
