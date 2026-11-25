@@ -110,6 +110,8 @@ gh pr merge <N> --squash --delete-branch --body "Closes #N"   # feature branches
                                               # head develop or main (release, back-merge): --merge, never --delete-branch
 ```
 
+Stacked PRs: before merging a PR with `--delete-branch`, retarget every open PR based on its branch (`gh pr list --base <branch>`, then `gh pr edit <M> --base develop`); deleting the base branch closes them.
+
 Develop model: method, `Closes #N` in the squash commit and the release PR per `gitgud-branch` section 8. Otherwise use the method the repo allows and its history shows. Without a convention: `--squash` for a feature branch with messy commits, `--rebase` for a branch of clean, individually meaningful commits, `--merge` when the branch history itself matters (release branches, long-lived integration).
 
 ## 8. After merge
