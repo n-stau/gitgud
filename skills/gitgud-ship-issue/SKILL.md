@@ -53,11 +53,13 @@ Each round:
 
 No host subagents: write down the findings in a separate pass that rereads only the issue and `gh pr diff`, ignoring how you built it.
 
-**b. Post the findings** as one review (event `COMMENT`: an author cannot request changes on their own PR). Body: round number and finding count, nits listed there. Each blocking finding is an inline comment:
+Every comment the loop posts starts with a signature line naming round and model, because they all post under the user's account: `**Review 1/5 · <model>**` from the reviewer, `**Fix 1/5 · <model>**` on each fixer reply. `<model>` is the model that did the work as the host names it (e.g. `Claude Opus 5.5`), else `agent`.
+
+**b. Post the findings** as one review (event `COMMENT`: an author cannot request changes on their own PR). Body: signature, finding count, nits listed there. Each blocking finding is an inline comment:
 
 ```bash
-COMMENTS_JSON=$(jq -c '[.[] | {path, line, side: "RIGHT", body: "**\(.severity)**: \(.problem) **Fix:** \(.fix)"}]' /tmp/findings.json)
-jq -n --arg body "Review round 1: 2 findings." --argjson c "$COMMENTS_JSON" \
+COMMENTS_JSON=$(jq -c '[.[] | {path, line, side: "RIGHT", body: "\($sig)\n\n**\(.severity)**: \(.problem) **Fix:** \(.fix)"}]' --arg sig "**Review 1/5 · Claude Opus 5.5**" /tmp/findings.json)
+jq -n --arg body "**Review 1/5 · Claude Opus 5.5** - 2 findings." --argjson c "$COMMENTS_JSON" \
   '{event: "COMMENT", body: $body, comments: $c}' > /tmp/review.json
 gh api -X POST repos/{owner}/{repo}/pulls/<N>/reviews --input /tmp/review.json --jq .id
 gh api repos/{owner}/{repo}/pulls/<N>/reviews/<review-id>/comments --jq '.[] | {id, path, line}'
